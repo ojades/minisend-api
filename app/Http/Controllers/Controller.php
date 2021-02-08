@@ -14,11 +14,12 @@ class Controller extends BaseController
 {
     use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
 
-    protected function sendSuccess($data): JsonResponse
+    protected function sendSuccess($data, $extra = []): JsonResponse
     {
         return response()->json([
             'status' => Constants::SUCCESS,
-            'data' => $data
+            'data' => $data,
+            'extra' => $extra
         ], 200);
     }
 

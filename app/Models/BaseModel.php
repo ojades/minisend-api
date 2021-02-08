@@ -20,7 +20,7 @@ class BaseModel extends Model
         $this->update();
     }
 
-    public static function filter(array $params, $limit = 10)
+    public static function filter(array $params, $limit)
     {
         $conditions = [];
 

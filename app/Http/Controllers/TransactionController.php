@@ -46,13 +46,23 @@ class TransactionController extends Controller
     public function getAll(Request $request)
     {
         $data = $request->validate([
-            'sender' => 'string',
-            'recipient' => 'string',
-            'subject' => 'string',
+            'sender' => 'string|nullable',
+            'recipient' => 'string|nullable',
+            'subject' => 'string|nullable',
+            'limit' => 'integer|nullable',
+            'status' => 'string|nullable'
         ]);
 
-        $transactions = Transactions::filter($data);
-        return $this->sendSuccess($transactions);
+        $limit = !empty($data['limit']) ? $data['limit'] : 10;
+
+        $transactions = Transactions::filter($data, $limit);
+
+        $statuses = Cache::rememberForever(Constants::STATUSES, function () {
+            $result = Transactions::select('status')->distinct()->get()->toArray();
+            return array_column($result, 'status');
+        });
+
+        return $this->sendSuccess($transactions, ['statuses' => $statuses]);
     }
 
     public function getDetails(Request $request, $id)
@@ -66,6 +76,7 @@ class TransactionController extends Controller
 
     public function getMetrics(Request $request)
     {
+        $metrics = Transactions::getMetrics();
         return $this->sendSuccess($metrics);
     }
 }

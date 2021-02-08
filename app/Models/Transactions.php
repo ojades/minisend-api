@@ -24,15 +24,18 @@ class Transactions extends BaseModel
 
     /**
      * @param array $params
-     * @param int $limit
+     * @param $limit
      * @return mixed
      */
-    public static function filter(array $params, $limit = 10)
+    public static function filter(array $params, $limit)
     {
+        unset($params['limit']);
         $conditions = [];
 
         foreach ($params as $key => $param) {
-            $conditions[] = [$key, '=', $param];
+            if(!empty($param)) {
+                $conditions[] = [$key, '=', $param];
+            }
         }
         return self::where($conditions)
             ->paginate($limit);
