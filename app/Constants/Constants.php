@@ -15,4 +15,5 @@ class Constants
      */
     public const METRICS = 'metrics';
     public const STATUSES = 'statuses';
+    public const ATTACHMENT = 'attachment-%s';
 }

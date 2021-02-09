@@ -20,7 +20,8 @@ class TransactionController extends Controller
             'recipient_email' => 'required|email',
             'subject' => 'required|string',
             'template' => 'required|string|exists:App\Models\Templates,slug',
-            'data' => 'json'
+            'data' => 'json',
+            'attachments' => 'file'
         ]);
 
         $template = Templates::getBySlug($data['template']);
@@ -37,6 +38,14 @@ class TransactionController extends Controller
         $data['sender_email'] = $template->sender_email;
 
         $transaction = Transactions::create($data);
+
+        if($request->hasFile('attachments')) {
+            $full_file_name = $request->file('attachments')->getClientOriginalName();
+            $new_file_path = $request->file('attachments')->storeAs(storage_path('attachments'), $full_file_name);
+            $data['attachment'][] = $new_file_path;
+        }
+
+        unset($data['attachments']);
 
         EmailTransactionJob::dispatch($transaction, $data, stripslashes($template->content));
 
@@ -57,7 +66,7 @@ class TransactionController extends Controller
 
         $transactions = Transactions::filter($data, $limit);
 
-        $statuses = Cache::rememberForever(Constants::STATUSES, function () {
+        $statuses = Cache::remember(Constants::STATUSES, 60, function () {
             $result = Transactions::select('status')->distinct()->get()->toArray();
             return array_column($result, 'status');
         });

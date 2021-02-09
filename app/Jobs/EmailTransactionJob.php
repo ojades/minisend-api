@@ -46,8 +46,15 @@ class EmailTransactionJob implements ShouldQueue
     {
         $params = json_decode($this->data['data']);
 
-        Mail::to($this->data['recipient_email'])
-            ->send(new Mailer($this->data, (array)$params, $this->template));
+        $mail = Mail::to($this->data['recipient_email']);
+
+        if(!empty($this->data['attachment'])) {
+            foreach ($this->data['attachment'] as $file) {
+                $mail->attach($file);
+            }
+        }
+
+        $mail->send(new Mailer($this->data, (array)$params, $this->template));
 
         if(Mail::failures()) {
             Log::error(json_encode(Mail::failures()));
