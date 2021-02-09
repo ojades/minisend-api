@@ -10,6 +10,7 @@ use App\Models\Templates;
 use App\Models\Transactions;
 use Cache;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class TransactionController extends Controller
 {
@@ -41,8 +42,12 @@ class TransactionController extends Controller
 
         if($request->hasFile('attachments')) {
             $full_file_name = $request->file('attachments')->getClientOriginalName();
-            $new_file_path = $request->file('attachments')->storeAs(storage_path('attachments'), $full_file_name);
-            $data['attachment'][] = $new_file_path;
+            $full_file_name = str_replace(' ', '_', $full_file_name);
+            $path = $request->file('attachments')->storeAs(
+                'attachments',
+                $full_file_name
+            );
+            $data['attachment'][] = $path;
         }
 
         unset($data['attachments']);

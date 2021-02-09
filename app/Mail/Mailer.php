@@ -6,6 +6,7 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
+use Storage;
 
 class Mailer extends Mailable
 {
@@ -44,8 +45,17 @@ class Mailer extends Mailable
             $template = str_replace('{{'.$key.'}}', $val, $template);
         }
 
-        return $this->subject($this->data['subject'])
+        $this->subject($this->data['subject'])
             ->from(config('mail.mailers.smtp.username'), $this->data['sender_name'])
             ->html($template);
+
+        if(!empty($this->data['attachment'])) {
+            foreach ($this->data['attachment'] as $file) {
+                $this->attach(Storage::url($file));
+            }
+        }
+
+        return $this;
+
     }
 }

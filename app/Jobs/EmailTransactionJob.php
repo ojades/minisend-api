@@ -9,6 +9,7 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Mail\PendingMail;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Log;
@@ -46,15 +47,8 @@ class EmailTransactionJob implements ShouldQueue
     {
         $params = json_decode($this->data['data']);
 
-        $mail = Mail::to($this->data['recipient_email']);
-
-        if(!empty($this->data['attachment'])) {
-            foreach ($this->data['attachment'] as $file) {
-                $mail->attach($file);
-            }
-        }
-
-        $mail->send(new Mailer($this->data, (array)$params, $this->template));
+        Mail::to($this->data['recipient_email'])
+            ->send(new Mailer($this->data, (array)$params, $this->template));
 
         if(Mail::failures()) {
             Log::error(json_encode(Mail::failures()));
